@@ -29,7 +29,12 @@ private:
     const uint8_t minutesInHour;
     const uint8_t secondsInMinute;
     const uint8_t degreesPerHour;
-    const qreal degreesPerMinutes;
+    const uint8_t degreesPerMinute;
+    const uint8_t degreesPerSecond;
+
+    QColor hourColor;
+    QColor minuteColor;
+    QColor secondColor;
 
     void drawPointers(QPainter &);
 };

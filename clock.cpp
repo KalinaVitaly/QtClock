@@ -1,4 +1,5 @@
 #include "clock.h"
+#include <QDebug>
 
 Clock::Clock(QWidget *parent)
     : QWidget(parent),
@@ -7,10 +8,14 @@ Clock::Clock(QWidget *parent)
       minutesInHour(60),
       secondsInMinute(60),
       degreesPerHour(30),
-      degreesPerMinutes(6)
+      degreesPerMinute(6),
+      degreesPerSecond(6),
+      hourColor(127, 0, 127, 100),
+      minuteColor(0, 127, 127, 100),
+      secondColor(202,235,248, 100)
 {
     connect(updateClock, SIGNAL(timeout()), SLOT(update()));
-    updateClock->start(1000 * 60);
+    updateClock->start(1000);
     QFont font;
     font.setPointSize(5);
     setFont(font);
@@ -54,26 +59,36 @@ void Clock::paintEvent(QPaintEvent *event) {
 }
 
 void Clock::drawPointers(QPainter & painter) {
-    static const int triangleMinutes[3][2] = {
+    static const int triangleSeconds[3][2] = {
         {-2, 0}, {2, 0}, {0, -38}
+    };
+    static const int triangleMinutes[3][2] = {
+        {-2, 0}, {2, 0}, {0, -27}
     };
     static const int triangleHours[3][2] = {
         {-2, 0}, {2, 0}, {0, -19}
     };
-    QColor hourColor(127, 0, 127);
-    QColor minuteColor(0, 127, 127, 191);
 
     painter.setPen(QPen(Qt::black, 1, Qt::SolidLine));
-    painter.setBrush(hourColor);
-    painter.rotate(degreesPerMinutes * QTime::currentTime().second());
-    painter.drawPolygon(QPolygon(3, &triangleMinutes[0][0]));
 
-
-    painter.setPen(QPen(Qt::black, 1, Qt::SolidLine));
     painter.setBrush(minuteColor);
     painter.rotate(degreesPerHour * (QTime::currentTime().hour() % 12));
     painter.drawPolygon(QPolygon(3, &triangleHours[0][0]));
+    painter.rotate(-degreesPerHour * (QTime::currentTime().hour() % 12));
 
+    painter.setBrush(hourColor);
+    painter.rotate(degreesPerMinute * QTime::currentTime().minute());
+    painter.drawPolygon(QPolygon(3, &triangleMinutes[0][0]));
+    painter.rotate(-degreesPerMinute * QTime::currentTime().minute());
+
+    painter.setBrush(secondColor);
+    painter.rotate(degreesPerSecond * QTime::currentTime().second());
+    painter.drawPolygon(QPolygon(3, &triangleSeconds[0][0]));
+    painter.rotate(-degreesPerSecond * QTime::currentTime().second());
+
+    qDebug() << "Hour: " << (QTime::currentTime().hour() % 12) << " Degrees hours: " << degreesPerHour * (QTime::currentTime().hour() % 12);
+    qDebug() << "Minute: " << (QTime::currentTime().minute()) << " Degrees minutes: " << degreesPerMinute * (QTime::currentTime().minute());
+    qDebug() << "Second: " << (QTime::currentTime().second()) << " Degrees second: " << degreesPerSecond * (QTime::currentTime().second());
 }
 
 Clock::~Clock()
